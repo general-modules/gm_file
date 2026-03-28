@@ -37,29 +37,61 @@ int main(int argc, char *argv[])
         free(cmd_result);
     }
 
-    const char *test_file = "./test_config.json";
-    printf("get file size. file: %s\n", test_file);
-    size_t file_size = 0;
-    int ret = gm_file_get_size(test_file, &file_size);
+    const char *bin_file_name = "./test_file.bin";
+    printf("get bin file size. file: %s\n", bin_file_name);
+    size_t bin_file_size = 0;
+    int ret = gm_file_get_size(bin_file_name, &bin_file_size);
     if (ret != 0)
     {
-        printf("get file size failed. file: %s, ret: %d\n\n", test_file, ret);
+        printf("get bin file size failed. file: %s, ret: %d\n\n", bin_file_name, ret);
     }
     else
     {
-        printf("get file size success. file: %s, size: %zu byte\n\n", test_file, file_size);
+        printf("get bin file size success. file: %s, size: %zu byte\n\n", bin_file_name, bin_file_size);
     }
 
-    printf("read file content. file: %s\n", test_file);
-    char *file_content = gm_file_read_content(test_file);
-    if (file_content == NULL)
+    printf("read bin file data. file: %s\n", bin_file_name);
+    uint8_t *bin_file_data = (uint8_t *)gm_file_read_raw(bin_file_name, 0, NULL);
+    if (bin_file_data == NULL)
     {
-        printf("read file content failed. file: %s\n", test_file);
+        printf("read bin file data failed. file: %s\n", bin_file_name);
     }
     else
     {
-        printf("read file content success. file: %s, content: %s\n", test_file, file_content);
-        free(file_content);
+        printf("read bin file data success. file: %s, data: ", bin_file_name);
+        for (size_t i = 0; i < bin_file_size; i++)
+        {
+            printf("0x%02x ", bin_file_data[i]);
+        }
+        printf("\n");
+        free(bin_file_data);
+    }
+
+    printf("\n=============================================================\n\n");
+
+    const char *text_file_name = "./test_file.json";
+    printf("get text file size. file: %s\n", text_file_name);
+    size_t text_file_size = 0;
+    ret = gm_file_get_size(text_file_name, &text_file_size);
+    if (ret != 0)
+    {
+        printf("get text file size failed. file: %s, ret: %d\n\n", text_file_name, ret);
+    }
+    else
+    {
+        printf("get text file size success. file: %s, size: %zu byte\n\n", text_file_name, text_file_size);
+    }
+
+    printf("read text file data. file: %s\n", text_file_name);
+    char *text_file_data = gm_file_read_text(text_file_name, 0, NULL);
+    if (text_file_data == NULL)
+    {
+        printf("read text file data failed. file: %s\n", text_file_name);
+    }
+    else
+    {
+        printf("read text file data success. file: %s, data: %s\n", text_file_name, text_file_data);
+        free(text_file_data);
     }
 
     return 0;
