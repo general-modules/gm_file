@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -80,6 +81,29 @@ void *gm_file_read_raw(const char *file_name, const size_t max_len, size_t *out_
  * @return 失败: NULL
  */
 char *gm_file_read_text(const char *file_name, const size_t max_len, size_t *out_len);
+
+/**
+ * @brief 写数据到文件
+ *
+ * @param[in] file_name: 文件名
+ * @param[in] data     : 待写入的数据(NULL: 创建/清空文件)
+ * @param[in] data_len : 待写入的数据长度(单位: 字节)
+ *
+ * @return 0 : 成功
+ * @return <0: 失败
+ */
+int gm_file_write(const char *file_name, const void *data, const size_t data_len);
+
+/**
+ * @brief 递归创建目录
+ *
+ * @param[in] path_name: 目录路径
+ * @param[in] mode     : 目录权限
+ *
+ * @return 0 : 成功
+ * @return <0: 失败
+ */
+int gm_file_mkdir(const char *path_name, const mode_t mode);
 
 #ifdef __cplusplus
 }

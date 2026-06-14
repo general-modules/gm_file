@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "gm_file.h"
 
@@ -266,4 +267,104 @@ char *gm_file_read_text(const char *file_name, const size_t max_len, size_t *out
     }
 
     return read_data;
+}
+
+int gm_file_write(const char *file_name, const void *data, const size_t data_len)
+{
+    if (file_name == NULL)
+    {
+        return -1;
+    }
+
+    if ((data == NULL) && (data_len > 0))
+    {
+        return -2;
+    }
+
+    FILE *fp = fopen(file_name, "wb");
+    if (fp == NULL)
+    {
+        return -3;
+    }
+
+    if (data_len > 0)
+    {
+        size_t write_len = fwrite(data, 1, data_len, fp);
+        if (write_len != data_len)
+        {
+            fclose(fp);
+
+            return -4;
+        }
+    }
+
+    if (fclose(fp) != 0)
+    {
+        return -5;
+    }
+
+    return 0;
+}
+
+int gm_file_mkdir(const char *path_name, mode_t mode)
+{
+    if (path_name == NULL)
+    {
+        return -1;
+    }
+
+    if (strlen(path_name) == 0)
+    {
+        return -2;
+    }
+
+    char *path_name_tmp = (char *)malloc(strlen(path_name) + 1);
+    if (path_name_tmp == NULL)
+    {
+        return -3;
+    }
+    strcpy(path_name_tmp, path_name);
+    size_t len = strlen(path_name_tmp);
+
+    // 去掉末尾的 '/'
+    if (len > 1 && path_name_tmp[len - 1] == '/')
+    {
+        path_name_tmp[len - 1] = '\0';
+    }
+
+    // 逐级创建
+    for (char *p = path_name_tmp + 1; *p; p++)
+    {
+        if (*p == '/' && *(p - 1) != '/')
+        {
+            *p = '\0';
+
+            if (mkdir(path_name_tmp, mode) != 0)
+            {
+                if (errno != EEXIST)
+                {
+                    free(path_name_tmp);
+
+                    return -4;
+                }
+            }
+
+            *p = '/';
+        }
+    }
+
+    // 创建最后一级
+    if (mkdir(path_name_tmp, mode) != 0)
+    {
+        if (errno != EEXIST)
+        {
+            free(path_name_tmp);
+
+            return -5;
+        }
+    }
+
+    free(path_name_tmp);
+
+    return 0;
 }
